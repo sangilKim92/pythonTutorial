@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras.utils import to_categorical
-
+print(tf.__version__)
 #숫자 데이터 받아오기
 mnist = tf.keras.datasets.mnist
 
@@ -33,7 +33,13 @@ model = tf.keras.models.Sequential([
 
 model.compile(optimizer='adam',loss='sparse_categorical_crossentropy',metrics=['accuracy'])
 
-model.fit(x_train,y_train,epochs=20)
+#model.fit(x_train,y_train,epochs=5)
 
+x_test=x_test.reshape(-1,28,28,1)
 model.evaluate(x_test,y_test)
 
+converter = tf.lite.TFLiteConverter.from_keras_model(model)
+tfLiteModel = converter.convert()
+
+open('mnist.tflite','wb').wrtie(tfLiteModel)
+#모델을 완료후 텐설플로우 라이트 모델로 사용하기 위해 파일로 변환한다. 
