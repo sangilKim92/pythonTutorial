@@ -7,7 +7,11 @@ from wordcloud import WordCloud
 from matplotlib import font_manager, rc
 from konlpy.tag import Okt
 from sklearn.feature_extraction.text import CountVectorizer
-
+from numpy import dot
+from numpy.linalg import norm
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 def get_korean_morphs(words):
     mecab = Mecab(dicpath ="C:\\mecab\\mecab-ko-dic")
@@ -90,3 +94,36 @@ def convert_bow(sentence, word_to_index):
 
     return vector
 
+
+def get_convert_cv(sentence, cv):
+    # 문장을 토큰으로 분리
+
+    tokenizer = Okt()
+    tokens = tokenizer.morphs(sentence)
+
+    # 토큰을 문자열로 변환
+    sentence = " ".join(tokens)
+
+    # CountVectorizer의 입력에 맞게 배열로 변경
+    sentences = []
+    sentences.append(sentence)
+
+    cv = CountVectorizer(token_pattern=r"(?u)\b\w+\b")
+    cv.fit(sentences)
+
+    # 벡터 변환
+    vector = cv.transform(sentences).toarray()
+
+    return vector
+
+def cos_sim(A, B):
+    return dot(A, B)/(norm(A)*norm(B))
+
+def get_cos_similiarity(A,B, cv): #문장 2개와 벡터를 받는다.
+    cosine_similarity(get_convert_cv(A, cv), get_convert_cv(B, cv))
+
+def tf_idf_sentence(corpus, sen1, sen2):
+    tf_idf = TfidfVectorizer(token_pattern=r"(?u)\b\w+\b")
+    tf_idf.fit(corpus)
+
+    
