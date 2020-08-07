@@ -108,7 +108,6 @@ target= 100
 print("\n")
 linear3 = MYLinear3(10,5)
 y=linear3(x2) # == linear3.forward(x2) 왜 같은지 모르겠음
-print(y)
 loss = (target - y.sum())**2
 #print(loss)
 #print(loss.backward()) #기울기 계산
@@ -134,10 +133,25 @@ def train(model, x, y,optim):
 
     y_hat = model(x) #feed-forward
 
-    loss = ((y-y_hat)**2).sum()/x.size(0) # 손실함수 계산 직접 구현
+    loss = ((y-y_hat)**2).sum()/x.size(0) # 손실함수 계산 직접 구현, 불러서 사용해도 된다.
 
-    loss.backward()  #backward는 자동으로 해줌
+    print(model.state_dict())
 
+    params=model.state_dict()
+    print(params['linear.weight'])
+    print(params['linear.bias'])
+
+    loss.backward()
+    params = model.state_dict()
+    print(params['linear.weight'])
+    print(params['linear.bias'])
+
+    optim.step() #오차역전파법 후에 최적화에 대해 step()까지 돌려야 가중치가 갱신된다.
+    params=model.state_dict()
+    print(params['linear.weight'])
+    print(params['linear.bias'])
+
+    #All optimizers implement a step() method, that updates the parameters. It can be used in two ways:
     return loss.data
 
 batch_size = 1
@@ -145,25 +159,33 @@ n_epochs = 1000
 n_iter = 10000
 
 model = MyModel(3,1)
-optim = torch.optim.SGD(model.parameters(), lr= 1e-4, momentum=0.1)
 
-print(model)
+#결국은 미분이다 미분으로 최솟값을 찾는데 미분의 계산을 줄이기위해 back propagation을 사용합니다.
+#back propagation의 효율을 높이기 위한 optimizer입니다. 학습률, momentum 등을 설정합니다.
+optim = torch.optim.SGD(model.parameters(), lr= 1e-4, momentum=0.1) #손실함수에 대한 미분을 경사하강법으로 지정, 모멘톰 0.1 학습률 1e-4
+#optimizer = optim.Adam([var1, var2], lr=0.0001) 아담 예시
+#SGD = 확률적 경사하강법, 배치사이즈가 너무 커서 학습이 오래 걸릴때, 임의로 데이터셋을 뽑아내 학습시키는 것
+x=torch.Tensor(1,3)
+y=ground_truth(x.data)
+loss = train(model, x, y, optim)
+
 
 for epoch in range(n_epochs):
     avg_loss = 0
 
     for i in range(n_iter):
         x = torch.rand(batch_size, 3)
-        y = ground_truth(x.data)
+        y = ground_truth(x.data) # y는 레이블이기에 함수가 아니라 답을 넣어야 한다. x데이터를 집어넣어 값을 매긴다.
 
         loss = train(model, x, y,optim)
 
-        avg_loss += loss
-        avg_loss = avg_loss / n_iter
+        avg_loss += loss #오차만큼 평균에 더한다.
+        avg_loss = avg_loss / n_iter #첫번째
 
     x_valid = torch.Tensor([[.3,.2,.1]])
     y_valid = ground_truth(x_valid.data)
 
+    #학습이 다 됐다고 판단하면 이제 평가를 위해 eval()함수 사용
     model.eval()
     y_hat = model(x_valid)
     model.train()
