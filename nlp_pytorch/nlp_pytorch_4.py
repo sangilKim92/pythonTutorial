@@ -6,6 +6,7 @@ ex) www.ted.com/robots.txt
 노이즈를 제거하려면 인덱스의 사용이 필수적이다.
 인덱스 사용을 위한 정규 표현식 예제
 '''
+from torch
 
 english='[a-z]' # a~z까지 영어만 표현
 not_eng='[^a-z]'# a~z를 제외한 문자식 표현
@@ -45,3 +46,18 @@ nltk 사용
 
 '''
 
+
+
+class parent():
+    def __init__(self):
+        print("parent")
+
+class child(parent):
+    def __init__(self):
+        super(child,self).__init__()
+        #super(self).__init__()
+        #parent.__init__(self)
+        #super(x)__init__() == parent.__init__(x)
+        print("child")
+
+child()
