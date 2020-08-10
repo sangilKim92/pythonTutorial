@@ -3,15 +3,41 @@ import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import re
 import matplotlib.pyplot as plt
+from bs4 import BeautifulSoup
+import json
+from tensorflow.python.keras.preprocessing.sequence import pad_sequences
+from tensorflow.python.keras.preprocessing.text import Tokenizer
 
 from collections import Counter
 
 from wordcloud import WordCloud
+from nltk.corpus import stopwords
 import nltk
 
-train = pd.read_csv("./labeledTrainData.tsv.zip", header=0, \
+train = pd.read_csv("./labeledTrainData.tsv.zip", header=0,
                     delimiter="\t", quoting=3)
 test= pd.read_csv("./testData.tsv.zip", header=0, delimiter="\t", quoting=3)
+
+def preprocessing(review, remove_stopwords = False):
+    review_text = BeautifulSoup(review,"html5lib").get_text()
+
+    review_text = re.sub("[^a-zA-Z]","", review_text)
+    words = review_text.lower().split()
+
+    stop_words = set(stopwords.words('english'))
+
+    if remove_stopwords:
+        stops = set(stopwords.words("english"))
+
+        words = [w for w in words if not w in stops]
+
+        clean_review = ' '.join(words)
+
+    else:
+        clean_review=' '.join(words)
+
+    return clean_review
+
 print(train['id'].unique().size)
 #id의 개수와 데이터의 개수 동일. id는 삭제해도 된다고 판단됩니다.).
 
