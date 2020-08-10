@@ -126,4 +126,23 @@ def tf_idf_sentence(corpus, sen1, sen2):
     tf_idf = TfidfVectorizer(token_pattern=r"(?u)\b\w+\b")
     tf_idf.fit(corpus)
 
-    
+def draw_histogram_token(df,col):
+    reviews = list(df[col])
+
+    tokenized_reviews=[r.split() for r in reviews]
+
+    review_len_by_token = [len(t) for t in tokenized_reviews]
+
+    review_len_by_eumjeol = [len(s.replace(' ','')) for s in reviews]
+
+    plt.figure(figsize=(12,5))
+
+    plt.hist(review_len_by_token, bins=50, alpha= 0.5, color ='r', label='word')
+    plt.hist(review_len_by_eumjeol, bins=50, alpha = 0.5, color='b', label='alphabet')
+    plt.yscale('log', nonposy='clip')
+
+    plt.title(str(col)+' Length Histogram')
+
+    plt.xlabel(str(col)+' Length')
+    plt.ylabel('Number of '+str(col))
+    plt.imshow()
